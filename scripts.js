@@ -1,3 +1,4 @@
+// scripts.js
 document.getElementById("date").value = new Date().toLocaleDateString();
 let dailyTotal = JSON.parse(localStorage.getItem('dailyTotal')) || {
     calories: 0,
@@ -17,6 +18,15 @@ window.onload = function() {
     historyRecords.forEach(record => addHistoryListItem(record));
     restoreTargetValues();
 };
+
+// 切换选项卡
+function showTab(tabId) {
+    let tabs = document.getElementsByClassName('tab-content');
+    for (let tab of tabs) {
+        tab.style.display = 'none';
+    }
+    document.getElementById(`tab-${tabId}`).style.display = 'block';
+}
 
 function calculate() {
     const foodName = document.getElementById("foodName").value;
