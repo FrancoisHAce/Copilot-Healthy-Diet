@@ -1,4 +1,3 @@
-// scripts.js
 document.getElementById("date").value = new Date().toLocaleDateString();
 let dailyTotal = JSON.parse(localStorage.getItem('dailyTotal')) || {
     calories: 0,
@@ -38,17 +37,32 @@ function calculate() {
     const sugar = parseFloat(document.getElementById("sugar").value) || 0;
     const ratio = parseFloat(document.getElementById("ratio").value) || 1;
     const measure = document.getElementById("measure").value;
+    const energyType = document.getElementById("energyType").value;
 
     let calories, proteinOutput, fatOutput, carbsOutput, sugarOutput;
 
+    if (energyType === "calories") {
+        calories = parseFloat(prompt("请输入本食物热量/kcal"));
+        if (!isNaN(calories)) {
+            calories = calories * ratio;
+        } else {
+            alert("请输入有效的热量值");
+            return;
+        }
+    } else {
+        if (measure === "perServing") {
+            calories = energy * 0.2389 * ratio;
+        } else {
+            calories = energy * 0.2389 * amount * ratio / 100;
+        }
+    }
+
     if (measure === "perServing") {
-        calories = energy * 0.2389 * ratio;
         proteinOutput = protein * ratio;
         fatOutput = fat * ratio;
         carbsOutput = carbs * ratio;
         sugarOutput = sugar * ratio;
     } else {
-        calories = energy * 0.2389 * amount * ratio / 100;
         proteinOutput = protein * amount * ratio / 100;
         fatOutput = fat * amount * ratio / 100;
         carbsOutput = carbs * amount * ratio / 100;
@@ -208,8 +222,8 @@ function clearRecords() {
 
 function addHistoryListItem(record) {
     const historyList = document.getElementById("historyList");
-    const historyItem = document.createElement("li");
-    historyItem.className = "list-group-item";
+    const historyItem = document.createElement("div");
+    historyItem.className = "chat-message chat-message-daily-record";
     historyItem.textContent = record;
     historyList.appendChild(historyItem);
 }
@@ -236,4 +250,31 @@ function undoDailyRecord() {
         const historyList = document.getElementById("historyList");
         historyList.removeChild(historyList.lastChild);
     }
+}
+
+function sendMessage() {
+    const messageInput = document.getElementById("chatMessage");
+    const message = messageInput.value.trim();
+    if (message === "") return;
+
+    addChatMessage("user", message);
+    messageInput.value = "";
+    // 处理用户消息（例如，调用聊天机器人API）
+}
+
+function undoMessage() {
+    const chatHistory = document.getElementById("historyList");
+    const lastMessage = chatHistory.lastChild;
+    if (lastMessage && lastMessage.classList.contains('chat-message-user')) {
+        chatHistory.removeChild(lastMessage);
+    }
+}
+
+function addChatMessage(sender, message) {
+    const chatHistory = document.getElementById("historyList");
+    const messageItem = document.createElement("div");
+    messageItem.className = `chat-message chat-message-${sender}`;
+    messageItem.textContent = message;
+    chatHistory.appendChild(messageItem);
+    chatHistory.scrollTop = chatHistory.scrollHeight; // 自动滚动到底部
 }

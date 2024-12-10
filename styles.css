@@ -1,3 +1,4 @@
+/* styles.css */
 body {
     font-family: Arial, sans-serif;
 }
@@ -22,6 +23,54 @@ body {
     flex-grow: 1;
     text-align: center;
 }
+.navbar-nav .nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: black;
+}
+.navbar-nav .nav-link i {
+    font-size: 1.5em;
+}
 .tab-content {
     padding: 20px;
+    margin-bottom: 60px; /* To ensure the content is not hidden behind the navbar */
+}
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 140px); /* Adjust based on navbar height */
+}
+.chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+.chat-input {
+    display: flex;
+    align-items: center;
+}
+.chat-input input {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+.chat-message {
+    padding: 10px;
+    border-radius: 10px;
+    margin: 5px 0;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+.chat-message-bot {
+    background-color: lightblue;
+    align-self: flex-start;
+}
+.chat-message-user {
+    background-color: lightgreen;
+    align-self: flex-end;
+}
+.chat-message-daily-record {
+    background-color: lightblue;
+    align-self: flex-start;
 }
