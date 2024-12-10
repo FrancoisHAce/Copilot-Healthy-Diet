@@ -1,0 +1,20 @@
+body {
+    font-family: Arial, sans-serif;
+}
+.section {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 20px 0;
+}
+.section h2 {
+    margin-top: 0;
+}
+.progress-bar-warning {
+    background-color: #ffc107;
+}
+.progress-bar-danger {
+    background-color: #dc3545;
+}
+.mb-3 {
+    margin-bottom: 1rem;
+}

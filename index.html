@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>每日食物热量累计</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css"> <!-- 引用外部CSS文件 -->
+</head>
+<body>
+    <div class="container">
+        <div class="section" id="foodSection">
+            <h2>食物本体区</h2>
+            <form>
+                <div class="form-group">
+                    <label for="foodName">食物名称:</label>
+                    <input type="text" class="form-control" id="foodName">
+                </div>
+                <div class="form-group">
+                    <label for="measure">计量方式:</label>
+                    <select class="form-control" id="measure">
+                        <option value="perServing">每份</option>
+                        <option value="per100g(ml)">每100g(ml)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">每份/g(ml):</label>
+                    <input type="number" class="form-control" id="amount">
+                </div>
+                <div class="form-group">
+                    <label for="energy">能量/kJ:</label>
+                    <input type="number" class="form-control" id="energy">
+                </div>
+                <div class="form-group">
+                    <label for="protein">蛋白质/g:</label>
+                    <input type="number" class="form-control" id="protein">
+                </div>
+                <div class="form-group">
+                    <label for="fat">脂肪/g:</label>
+                    <input type="number" class="form-control" id="fat">
+                </div>
+                <div class="form-group">
+                    <label for="carbs">碳水/g:</label>
+                    <input type="number" class="form-control" id="carbs">
+                </div>
+                <div class="form-group">
+                    <label for="sugar">糖/g:</label>
+                    <input type="number" class="form-control" id="sugar">
+                </div>
+                <div class="form-group">
+                    <label for="ratio">摄入比例:</label>
+                    <input type="number" class="form-control" id="ratio" step="0.01">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="calculate()">计算</button>
+                <div class="form-group">
+                    <label for="date">日期:</label>
+                    <input type="text" class="form-control" id="date" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="calories">本食物热量/kcal:</label>
+                    <input type="text" class="form-control" id="calories" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="proteinOutput">本食物蛋白质/g:</label>
+                    <input type="text" class="form-control" id="proteinOutput" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="fatOutput">本食物脂肪/g:</label>
+                    <input type="text" class="form-control" id="fatOutput" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="carbsOutput">本食物碳水/g:</label>
+                    <input type="text" class="form-control" id="carbsOutput" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="sugarOutput">本食物糖/g:</label>
+                    <input type="text" class="form-control" id="sugarOutput" readonly>
+                </div>
+            </form>
+        </div>
+
+        <div class="section" id="ledgerSection">
+            <h2>流水账区</h2>
+            <button type="button" class="btn btn-success" onclick="includeRecord()">计入</button>
+            <button type="button" class="btn btn-danger" onclick="confirmDelete()">删除上一条记录</button>
+            <button type="button" class="btn btn-warning" onclick="confirmClear()">清空</button><br><br>
+
+            <h3>当日摄入记录</h3>
+            <ul id="intakeList" class="list-group"></ul>
+        </div>
+
+        <div class="section" id="cumulativeSection">
+            <h2>本日累计区</h2>
+            <ul id="cumulativeList" class="list-group">
+                <li class="list-group-item">本日已摄入:</li>
+                <li class="list-group-item">总热量: <span id="totalCalories">0</span> kcal</li>
+                <li class="list-group-item">总蛋白质: <span id="totalProtein">0</span> g</li>
+                <li class="list-group-item">总脂肪: <span id="totalFat">0</span> g</li>
+                <li class="list-group-item">总碳水: <span id="totalCarbs">0</span> g</li>
+                <li class="list-group-item">已知总糖: <span id="totalSugar">0</span> g</li>
+            </ul>
+            <div class="form-group">
+                <label for="targetCalories">本日目标热量/kcal:</label>
+                <input type="number" class="form-control" id="targetCalories">
+            </div>
+            <div class="form-group">
+                <label for="targetProtein">本日目标蛋白质/g:</label>
+                <input type="number" class="form-control" id="targetProtein">
+            </div>
+            <div class="form-group">
+                <label for="targetFat">本日目标脂肪/g:</label>
+                <input type="number" class="form-control" id="targetFat">
+            </div>
+            <div class="form-group">
+                <label for="targetCarbs">本日目标碳水/g:</label>
+                <input type="number" class="form-control" id="targetCarbs">
+            </div>
+            <button type="button" class="btn btn-info" onclick="showProgress()">查看进度</button>
+            <div id="progressSection" style="display:none;">
+                <h3>进度</h3>
+                <div class="mb-3">
+                    <label>总热量进度:</label>
+                    <div class="progress">
+                        <div id="caloriesProgress" class="progress-bar" role="progressbar"></div>
+                    </div>
+                    <small id="caloriesProgressText"></small>
+                </div>
+                <div class="mb-3">
+                    <label>总蛋白质进度:</label>
+                    <div class="progress">
+                        <div id="proteinProgress" class="progress-bar" role="progressbar"></div>
+                    </div>
+                    <small id="proteinProgressText"></small>
+                </div>
+                <div class="mb-3">
+                    <label>总脂肪进度:</label>
+                    <div class="progress">
+                        <div id="fatProgress" class="progress-bar" role="progressbar"></div>
+                    </div>
+                    <small id="fatProgressText"></small>
+                </div>
+                <div class="mb-3">
+                    <label>总碳水进度:</label>
+                    <div class="progress">
+                        <div id="carbsProgress" class="progress-bar" role="progressbar"></div>
+                    </div>
+                    <small id="carbsProgressText"></small>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="historySection">
+            <h2>日历史记录区</h2>
+            <button type="button" class="btn btn-primary" onclick="addDailyRecord()">日记录</button>
+            <button type="button" class="btn btn-danger" onclick="confirmUndoDailyRecord()">撤销上一条日记录</button>
+            <ul id="historyList" class="list-group"></ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("date").value = new Date().toLocaleDateString();
+        let dailyTotal = JSON.parse(localStorage.getItem('dailyTotal')) || {
+            calories: 0,
+            protein: 0,
+            fat: 0,
+            carbs: 0,
+            sugar: 0
+        };
+        let records = JSON.parse(localStorage.getItem('records')) || [];
+        let historyRecords = JSON.parse(localStorage.getItem('historyRecords')) || [];
+        let targetValues = JSON.parse(localStorage.getItem('targetValues')) || {};
+
+    // 恢复记录
+    window.onload = function() {
+        records.forEach(record => addIntakeListItem(record));
+        updateCumulative();
+        historyRecords.forEach(record => addHistoryListItem(record));
+        restoreTargetValues();
+    };
+
+    function calculate() {
+        const foodName = document.getElementById("foodName").value;
+        const amount = parseFloat(document.getElementById("amount").value) || 0;
+        const energy = parseFloat(document.getElementById("energy").value) || 0;
+        const protein = parseFloat(document.getElementById("protein").value) || 0;
+        const fat = parseFloat(document.getElementById("fat").value) || 0;
+        const carbs = parseFloat(document.getElementById("carbs").value) || 0;
+        const sugar = parseFloat(document.getElementById("sugar").value) || 0;
+        const ratio = parseFloat(document.getElementById("ratio").value) || 1;
+        const measure = document.getElementById("measure").value;
+
+        let calories, proteinOutput, fatOutput, carbsOutput, sugarOutput;
+
+        if (measure === "perServing") {
+            calories = energy * 0.2389 * ratio;
+            proteinOutput = protein * ratio;
+            fatOutput = fat * ratio;
+            carbsOutput = carbs * ratio;
+            sugarOutput = sugar * ratio;
+        } else {
+            calories = energy * 0.2389 * amount * ratio / 100;
+            proteinOutput = protein * amount * ratio / 100;
+            fatOutput = fat * amount * ratio / 100;
+            carbsOutput = carbs * amount * ratio / 100;
+            sugarOutput = sugar * amount * ratio / 100;
+        }
+
+        document.getElementById("calories").value = calories.toFixed(2);
+        document.getElementById("proteinOutput").value = proteinOutput.toFixed(2);
+        document.getElementById("fatOutput").value = fatOutput.toFixed(2);
+        document.getElementById("carbsOutput").value = carbsOutput.toFixed(2);
+        document.getElementById("sugarOutput").value = sugarOutput.toFixed(2);
+    }
+
+    function includeRecord() {
+        const foodName = document.getElementById("foodName").value;
+        const calories = parseFloat(document.getElementById("calories").value);
+        const proteinOutput = parseFloat(document.getElementById("proteinOutput").value);
+        const fatOutput = parseFloat(document.getElementById("fatOutput").value);
+        const carbsOutput = parseFloat(document.getElementById("carbsOutput").value);
+        const sugarOutput = parseFloat(document.getElementById("sugarOutput").value);
+
+        const record = {
+            foodName: foodName,
+            calories: calories,
+            protein: proteinOutput,
+            fat: fatOutput,
+            carbs: carbsOutput,
+            sugar: sugarOutput
+        };
+
+        addIntakeListItem(record);
+        records.push(record);
+        localStorage.setItem('records', JSON.stringify(records));
+
+        dailyTotal.calories += calories;
+        dailyTotal.protein += proteinOutput;
+        dailyTotal.fat += fatOutput;
+        dailyTotal.carbs += carbsOutput;
+        dailyTotal.sugar += sugarOutput;
+        localStorage.setItem('dailyTotal', JSON.stringify(dailyTotal));
+
+        updateCumulative();
+    }
+
+    function addIntakeListItem(record) {
+        const intakeList = document.getElementById("intakeList");
+        const listItem = document.createElement("li");
+        listItem.className = "list-group-item";
+        const sugarText = record.sugar ? record.sugar.toFixed(2) + " g" : "糖量未知";
+        listItem.textContent = `序号 ${intakeList.children.length + 1}: ${record.foodName} 热量 ${record.calories.toFixed(2)} kcal, 蛋白质 ${record.protein.toFixed(2)} g, 脂肪 ${record.fat.toFixed(2)} g, 碳水 ${record.carbs.toFixed(2)} g, 糖 ${sugarText}`;
+        intakeList.appendChild(listItem);
+    }
+
+    function updateCumulative() {
+        document.getElementById("totalCalories").textContent = dailyTotal.calories.toFixed(2);
+        document.getElementById("totalProtein").textContent = dailyTotal.protein.toFixed(2);
+        document.getElementById("totalFat").textContent = dailyTotal.fat.toFixed(2);
+        document.getElementById("totalCarbs").textContent = dailyTotal.carbs.toFixed(2);
+        document.getElementById("totalSugar").textContent = dailyTotal.sugar.toFixed(2);
+
+        if (targetValues.calories) updateProgress("calories", dailyTotal.calories, targetValues.calories);
+        if (targetValues.protein) updateProgress("protein", dailyTotal.protein, targetValues.protein);
+        if (targetValues.fat) updateProgress("fat", dailyTotal.fat, targetValues.fat);
+        if (targetValues.carbs) updateProgress("carbs", dailyTotal.carbs, targetValues.carbs);
+    }
+
+    function updateProgress(type, current, target) {
+        const percentage = ((current / target) * 100).toFixed(2);
+        const progressBar = document.getElementById(`${type}Progress`);
+        const progressText = document.getElementById(`${type}ProgressText`);
+
+        if (!progressBar) {
+            return;
+        }
+
+        progressText.textContent = `${percentage}%`;
+
+        if (percentage > 100) {
+            progressBar.className = "progress-bar progress-bar-danger";
+            progressText.className = "text-danger";
+        } else if (percentage > 80) {
+            progressBar.className = "progress-bar progress-bar-warning";
+            progressText.className = "text-warning";
+        } else {
+            progressBar.className = "progress-bar";
+            progressText.className = "";
+        }
+
+        progressBar.style.width = `${percentage}%`;
+    }
+
+    function showProgress() {
+        const targetCalories = parseFloat(document.getElementById("targetCalories").value);
+        const targetProtein = parseFloat(document.getElementById("targetProtein").value);
+        const targetFat = parseFloat(document.getElementById("targetFat").value);
+        const targetCarbs = parseFloat(document.getElementById("targetCarbs").value);
+
+        targetValues = { calories: targetCalories, protein: targetProtein, fat: targetFat, carbs: targetCarbs };
+        localStorage.setItem('targetValues', JSON.stringify(targetValues));
+
+        document.getElementById("progressSection").style.display = "block";
+        updateCumulative();
+    }
+
+    function restoreTargetValues() {
+        if (targetValues.calories) document.getElementById("targetCalories").value = targetValues.calories;
+        if (targetValues.protein) document.getElementById("targetProtein").value = targetValues.protein;
+        if (targetValues.fat) document.getElementById("targetFat").value = targetValues.fat;
+        if (targetValues.carbs) document.getElementById("targetCarbs").value = targetValues.carbs;
+
+        if (Object.keys(targetValues).length > 0) {
+            document.getElementById("progressSection").style.display = "block";
+            updateCumulative();
+        }
+    }
+
+    function confirmDelete() {
+        if (confirm("是否确认删除上一条记录？")) {
+            deleteLastRecord();
+        }
+    }
+
+    function confirmClear() {
+        if (confirm("是否确认清空所有记录？")) {
+            clearRecords();
+        }
+    }
+
+    function deleteLastRecord() {
+        const intakeList = document.getElementById("intakeList");
+        if (records.length > 0) {
+            const lastRecord = records.pop();
+            dailyTotal.calories -= lastRecord.calories;
+            dailyTotal.protein -= lastRecord.protein;
+            dailyTotal.fat -= lastRecord.fat;
+            dailyTotal.carbs -= lastRecord.carbs;
+            dailyTotal.sugar -= lastRecord.sugar;
+
+            intakeList.removeChild(intakeList.lastChild);
+            updateCumulative();
+
+            localStorage.setItem('records', JSON.stringify(records));
+            localStorage.setItem('dailyTotal', JSON.stringify(dailyTotal));
+        }
+    }
+
+    function clearRecords() {
+        const intakeList = document.getElementById("intakeList");
+        intakeList.innerHTML = '';
+        records = [];
+        dailyTotal = {calories: 0, protein: 0, fat: 0, carbs: 0, sugar: 0};
+        updateCumulative();
+
+        localStorage.setItem('records', JSON.stringify(records));
+        localStorage.setItem('dailyTotal', JSON.stringify(dailyTotal));
+    }
+
+    function addHistoryListItem(record) {
+        const historyList = document.getElementById("historyList");
+        const historyItem = document.createElement("li");
+        historyItem.className = "list-group-item";
+        historyItem.textContent = record;
+        historyList.appendChild(historyItem);
+    }
+
+    function addDailyRecord() {
+        const today = new Date().toLocaleDateString();
+        const record = `${today}, 摄入总热量: ${dailyTotal.calories.toFixed(2)} kcal，占目标 ${((dailyTotal.calories / targetValues.calories) * 100).toFixed(2)}%，总蛋白质: ${dailyTotal.protein.toFixed(2)} g，占目标 ${((dailyTotal.protein / targetValues.protein) * 100).toFixed(2)}%，总脂肪: ${dailyTotal.fat.toFixed(2)} g，占目标 ${((dailyTotal.fat / targetValues.fat) * 100).toFixed(2)}%，总碳水: ${dailyTotal.carbs.toFixed(2)} g，占目标 ${((dailyTotal.carbs / targetValues.carbs) * 100).toFixed(2)}%，已知总糖: ${dailyTotal.sugar.toFixed(2)} g`;
+
+        historyRecords.push(record);
+        localStorage.setItem('historyRecords', JSON.stringify(historyRecords));
+        addHistoryListItem(record);
+    }
+
+    function confirmUndoDailyRecord() {
+        if (confirm("是否确认撤销上一条日记录？")) {
+            undoDailyRecord();
+        }
+    }
+
+    function undoDailyRecord() {
+        if (historyRecords.length > 0) {
+            historyRecords.pop();
+            localStorage.setItem('historyRecords', JSON.stringify(historyRecords));
+            const historyList = document.getElementById("historyList");
+            historyList.removeChild(historyList.lastChild);
+        }
+    }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="scripts.js"></script> <!-- 引用外部JavaScript文件 -->
+</body>
+</html>
