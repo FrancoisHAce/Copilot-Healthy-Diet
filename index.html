@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>Copilot Healthy Diet 3.58</title>
+    <title>Copilot Healthy Diet 3.2.10</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -28,7 +28,7 @@
                 </div>
                 <div class="form-group">
                     <label for="energyType">能量或热量:</label>
-                    <select class="form-control" id="energyType">
+                    <select class="form-control" id="energyType" onchange="toggleEnergyInput()">
                         <option value="energy">能量</option>
                         <option value="calories">热量</option>
                     </select>
@@ -38,7 +38,7 @@
                     <input type="number" class="form-control" id="amount">
                 </div>
                 <div class="form-group">
-                    <label for="energy">能量/kJ:</label>
+                    <label id="energyLabel" for="energy">能量/kJ:</label>
                     <input type="number" class="form-control" id="energy">
                 </div>
                 <div class="form-group">
@@ -187,6 +187,69 @@
             </li>
         </ul>
     </nav>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">确认删除</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    是否确认删除上一条记录？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteLastRecord()" data-dismiss="modal">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 清空确认模态框 -->
+    <div class="modal fade" id="clearConfirmModal" tabindex="-1" role="dialog" aria-labelledby="clearConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="clearConfirmModalLabel">确认清空</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    是否确认清空所有记录？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-warning" onclick="clearRecords()" data-dismiss="modal">清空</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 撤销日记录确认模态框 -->
+    <div class="modal fade" id="undoDailyRecordConfirmModal" tabindex="-1" role="dialog" aria-labelledby="undoDailyRecordConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="undoDailyRecordConfirmModalLabel">确认撤销</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    是否确认撤销上一条日记录？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="undoDailyRecord()" data-dismiss="modal">撤销</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
