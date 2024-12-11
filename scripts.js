@@ -27,9 +27,24 @@ function showTab(tabId) {
     document.getElementById(`tab-${tabId}`).style.display = 'block';
 }
 
+function toggleEnergyInput() {
+    const energyType = document.getElementById("energyType").value;
+    const energyLabel = document.getElementById("energyLabel");
+    const energyInput = document.getElementById("energy");
+
+    if (energyType === "calories") {
+        energyLabel.textContent = "热量/kcal";
+        energyInput.placeholder = "输入热量 (kcal)";
+    } else {
+        energyLabel.textContent = "能量/kJ";
+        energyInput.placeholder = "输入能量 (kJ)";
+    }
+}
+
 function calculate() {
     const foodName = document.getElementById("foodName").value;
     const amount = parseFloat(document.getElementById("amount").value) || 0;
+    const energyType = document.getElementById("energyType").value;
     const energy = parseFloat(document.getElementById("energy").value) || 0;
     const protein = parseFloat(document.getElementById("protein").value) || 0;
     const fat = parseFloat(document.getElementById("fat").value) || 0;
@@ -37,18 +52,11 @@ function calculate() {
     const sugar = parseFloat(document.getElementById("sugar").value) || 0;
     const ratio = parseFloat(document.getElementById("ratio").value) || 1;
     const measure = document.getElementById("measure").value;
-    const energyType = document.getElementById("energyType").value;
 
     let calories, proteinOutput, fatOutput, carbsOutput, sugarOutput;
 
     if (energyType === "calories") {
-        calories = parseFloat(prompt("请输入本食物热量/kcal"));
-        if (!isNaN(calories)) {
-            calories = calories * ratio;
-        } else {
-            alert("请输入有效的热量值");
-            return;
-        }
+        calories = energy * ratio;
     } else {
         if (measure === "perServing") {
             calories = energy * 0.2389 * ratio;
@@ -180,15 +188,15 @@ function restoreTargetValues() {
 }
 
 function confirmDelete() {
-    if (confirm("是否确认删除上一条记录？")) {
-        deleteLastRecord();
-    }
+    $('#deleteConfirmModal').modal('show');
 }
 
 function confirmClear() {
-    if (confirm("是否确认清空所有记录？")) {
-        clearRecords();
-    }
+    $('#clearConfirmModal').modal('show');
+}
+
+function confirmUndoDailyRecord() {
+    $('#undoDailyRecordConfirmModal').modal('show');
 }
 
 function deleteLastRecord() {
@@ -237,12 +245,6 @@ function addDailyRecord() {
     addHistoryListItem(record);
 }
 
-function confirmUndoDailyRecord() {
-    if (confirm("是否确认撤销上一条日记录？")) {
-        undoDailyRecord();
-    }
-}
-
 function undoDailyRecord() {
     if (historyRecords.length > 0) {
         historyRecords.pop();
@@ -259,7 +261,6 @@ function sendMessage() {
 
     addChatMessage("user", message);
     messageInput.value = "";
-    // 处理用户消息（例如，调用聊天机器人API）
 }
 
 function undoMessage() {
